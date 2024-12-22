@@ -1,10 +1,9 @@
-"use client"
+"use client";
 import React from 'react'
 
-
-function page() {
+const page = () => {
   return (
-    <div>message page</div>
+    <div>page</div>
   )
 }
 
