@@ -11,18 +11,17 @@ import { useRouter } from 'next/navigation';
 import axios, { AxiosError } from 'axios';
 import { Loader2 } from 'lucide-react';
 
-
 const Page = () => {
     const [username, setUsername] = useState('');
     const [usernameMessage, setUsernameMessage] = useState('');
     const [isCheckingUsername, setIsCheckingUsername] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const debouncedUsername = useDebounceValue(username, 400);
+    const debouncedUsername = useDebounceValue(username, 400); // Debounced username input
     const { toast } = useToast();
     const router = useRouter();
 
-    // Zod + React Hook Form
+    // Zod + React Hook Form for validation
     const form = useForm<z.infer<typeof signUpSchema>>({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
@@ -32,14 +31,17 @@ const Page = () => {
         },
     });
 
+    // Client-specific logic for username validation
     useEffect(() => {
+        if (typeof window === 'undefined') return; // Prevent SSR mismatch issues
+
         const checkUsername = async () => {
             if (debouncedUsername.length < 2) {
                 setUsernameMessage('');
                 return;
             }
             setIsCheckingUsername(true);
-            setUsernameMessage('');
+            setUsernameMessage(''); // Reset message during checking
 
             try {
                 const response = await axios.get(`/api/check-username?username=${debouncedUsername}`);
@@ -55,8 +57,9 @@ const Page = () => {
         checkUsername();
     }, [debouncedUsername]);
 
+    // Form submission logic
     const Submit = async (data: z.infer<typeof signUpSchema>) => {
-        setIsSubmitting(true);
+        setIsSubmitting(true); // Start submission
         try {
             await axios.post('/api/signup', data);
             toast({
@@ -73,7 +76,7 @@ const Page = () => {
                 variant: "destructive",
             });
         } finally {
-            setIsSubmitting(false);
+            setIsSubmitting(false); // End submission
         }
     };
 
@@ -88,6 +91,7 @@ const Page = () => {
                 </div>
 
                 <form onSubmit={form.handleSubmit(Submit)} className="space-y-6">
+                    {/* Username Input */}
                     <div className="space-y-2">
                         <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                             Username
@@ -113,6 +117,7 @@ const Page = () => {
                         )}
                     </div>
 
+                    {/* Email Input */}
                     <div className="space-y-2">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             Email
@@ -125,6 +130,7 @@ const Page = () => {
                         />
                     </div>
 
+                    {/* Password Input */}
                     <div className="space-y-2">
                         <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                             Password
@@ -137,6 +143,7 @@ const Page = () => {
                         />
                     </div>
 
+                    {/* Submit Button */}
                     <button
                         type="submit"
                         className="w-full px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg transition-all duration-200 transform hover:translate-y-[-1px] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
@@ -153,6 +160,7 @@ const Page = () => {
                     </button>
                 </form>
 
+                {/* Sign-in Link */}
                 <div className="text-center text-sm text-gray-600">
                     Already a member?{' '}
                     <a href="/signin" className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200">
